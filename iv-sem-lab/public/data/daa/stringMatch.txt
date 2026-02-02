@@ -1,0 +1,44 @@
+#include <stdio.h>
+#include <string.h>
+int stringMatch(char p[],char t[],int n,int m)
+{
+    int i,j=0;
+    for(i = 0; i<n-m+1; i++)
+    {
+        while(p[j] == t[i+j] && j<m)
+        {
+            j++;
+        }
+        if(j==m)
+            return i;
+    }
+    return -1;
+}
+int main()
+{
+    int n,m;
+    char p[20],t[20];
+    printf("Enter Text:\n");
+    gets(t);
+    printf("Enter Pattern:\n");
+    gets(p);
+    n = strlen(t);
+    m = strlen(p);
+    printf("Length of text: %d \nLength of pattern: %d\n",n,m);
+    if(n<m)
+    {
+        printf("Error!!!!!!\n");
+        exit(0);
+    }
+    int pos = stringMatch(p,t,n,m);
+    if(pos==-1)
+    {
+        printf("Pattern not found !!!\n");
+    }
+    else
+    {
+        printf("Pattern found at %d\n",pos+1);
+    }
+
+    return 0;
+}
