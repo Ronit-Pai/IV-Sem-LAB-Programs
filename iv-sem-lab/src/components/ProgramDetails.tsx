@@ -10,7 +10,6 @@ type Params = {
 const ProgramDetails: React.FC = () => {
   const { courseName, programName } = useParams<Params>();
   const [programContent, setProgramContent] = useState<string>('');
-  const [sampleOutput, setSampleOutput] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,121 +17,116 @@ const ProgramDetails: React.FC = () => {
       try {
         if (!courseName || !programName) {
           setProgramContent('// Error: Course or program name not provided');
-          setSampleOutput('Error: Course or program name not provided');
+          setLoading(false);
           return;
         }
 
-        // Map programName to filename
-        const fileMap: Record<string, string> = {
-          bubbleSort: 'bubbleSort.txt',
-          mergeSort: 'mergeSort.txt',
-          selectionSort: 'selectionSort.txt',
-          stringMatch: 'stringMatch.txt',
-        };
+        // Decode the program name and map it to the correct file name
+        const decodedProgramName = decodeURIComponent(programName);
+        
+        // Determine file extension based on course
+        let fileName = '';
+        if (courseName.toLowerCase() === 'daa') {
+          fileName = `${decodedProgramName}.txt`;
+        } else if (courseName.toLowerCase() === 'mp') {
+          fileName = `${decodedProgramName}.ASM`;
+        } else if (courseName.toLowerCase() === 'dbms') {
+          fileName = `${decodedProgramName}.sql`;
+        } else if (courseName.toLowerCase() === 'unix') {
+          // For UNIX, we'll try multiple approaches to find the correct file
+          // First, check if the programName already includes an extension
+          if (decodedProgramName.includes('.')) {
+            // If the programName already has an extension, use it as-is
+            fileName = decodedProgramName;
+          } else {
+            // If no extension, try to determine the correct one
+            // We'll try common extensions in order of priority
+            const extensionsToTry = ['.txt', '.sh', '.awk', '']; // Note: empty string for files without extension
+            
+            let found = false;
+            for (const ext of extensionsToTry) {
+              const testFileName = `${decodedProgramName}${ext}`;
+              try {
+                const response = await fetch(`/data/${courseName.toLowerCase()}/${testFileName}`);
+                
+                if (response.ok) {
+                  // Check if the response is actually text content and not HTML
+                  const content = await response.text();
+                  
+                  // If content starts with '<' it might be HTML, so we should try the next extension
+                  if (!content.trim().startsWith('<')) {
+                    fileName = testFileName;
+                    setProgramContent(content);
+                    found = true;
+                    break;
+                  }
+                }
+              } catch (err) {
+                // Continue to next extension if there's an error
+                continue;
+              }
+            }
+            
+            if (!found) {
+              // If no file found with any extension, try the original name as-is
+              fileName = decodedProgramName;
+              setProgramContent(`// Error: Could not find file ${decodedProgramName} with common extensions`);
+              setLoading(false);
+              return; // Exit early since we've handled the response
+            }
+          }
+        }
 
-        const fileName = fileMap[programName];
-
+        // If we reach here, fileName has been set
         if (!fileName) {
-          setProgramContent('// Program file not found');
-          setSampleOutput('Program file not found');
+          setProgramContent('// Error: Could not determine file name');
+          setLoading(false);
           return;
         }
 
-        // Fetch program code
-        const response = await fetch(`/data/${courseName.toLowerCase()}/${fileName}`);
+        // Only fetch if the content hasn't been set yet (in the loop above)
+        // If fileName is already set but programContent is still empty, fetch the content
+        if (programContent === '') {
+          const response = await fetch(`/data/${courseName.toLowerCase()}/${fileName}`);
 
-        if (response.ok) {
-          const content = await response.text();
-          setProgramContent(content);
-        } else {
-          setProgramContent('// Error: Could not load program content');
+          if (response.ok) {
+            const content = await response.text();
+            // Check if the content looks like HTML (starts with <html>, <head>, <body>, etc.)
+            if (content.trim().startsWith('<')) {
+              setProgramContent(`// Error: Unexpected HTML content received instead of program code\n// File: ${fileName}\n// Please check if the file exists and is accessible`);
+            } else {
+              setProgramContent(content);
+            }
+          } else {
+            setProgramContent(`// Error: Could not load program content\n// File: ${fileName}\n// Status: ${response.status} ${response.statusText}`);
+          }
         }
-
-        // Perfected sample outputs
-        let output = '';
-
-        switch (programName) {
-          case 'bubbleSort':
-            output = `Input:
-64 34 25 12 22 11 90
-
-Expected Output:
-Original array:
-64 34 25 12 22 11 90
-
-Sorted array:
-11 12 22 25 34 64 90
-
-Time Complexity: O(n^2)
-Space Complexity: O(1)`;
-            break;
-
-          case 'mergeSort':
-            output = `Input:
-12 11 13 5 6 7
-
-Expected Output:
-Given array is:
-12 11 13 5 6 7
-
-Sorted array is:
-5 6 7 11 12 13
-
-Time Complexity: O(n log n)
-Space Complexity: O(n)`;
-            break;
-
-          case 'selectionSort':
-            output = `Input:
-64 25 12 22 11 90
-
-Expected Output:
-Original array:
-64 25 12 22 11 90
-
-Sorted array:
-11 12 22 25 64 90
-
-Time Complexity: O(n^2)
-Space Complexity: O(1)`;
-            break;
-
-          case 'stringMatch':
-            output = `Text:
-AABAACAADAABAAABAA
-
-Pattern:
-AABA
-
-Expected Output:
-Pattern found at index 0
-Pattern found at index 9
-Pattern found at index 13
-
-Time Complexity: O(n × m)
-(where n = length of text, m = length of pattern)
-Space Complexity: O(1)`;
-            break;
-
-          default:
-            output = `Program executed successfully!
-
-Time Complexity: O(1)
-Space Complexity: O(1)`;
-        }
-
-        setSampleOutput(output);
       } catch (error) {
         console.error('Error fetching program content:', error);
-        setProgramContent('// Error: Could not load program content');
-        setSampleOutput('Error: Could not load sample output');
+        setProgramContent('// Error: Could not load program content due to network error');
       } finally {
         setLoading(false);
       }
     };
 
     fetchProgramContent();
-  }, [courseName, programName]);
+  }, [courseName, programName]); // Dependencies array is correct
+
+  // Get associated downloads for UNIX programs
+  const getAssociatedDownloads = () => {
+    if (courseName?.toLowerCase() !== 'unix' || !programName) return [];
+    
+    const decodedProgramName = decodeURIComponent(programName);
+    // Check if the program name matches awk1, awk2, or awk3 (without extension)
+    const baseName = decodedProgramName.split('.')[0]; // Split by dot and take first part
+    const assocFiles: Record<string, string[]> = {
+      'awk1': ['sales_data'],
+      'awk2': ['emp'],
+      'awk3': ['textfile']
+    };
+    
+    return assocFiles[baseName] || [];
+  };
 
   const navLinks = courseName
     ? [
@@ -140,6 +134,8 @@ Space Complexity: O(1)`;
         { to: `/course/${courseName}`, label: courseName },
       ]
     : [{ to: '/', label: 'Home' }];
+
+  const associatedDownloads = getAssociatedDownloads();
 
   return (
     <div className="site-wrapper">
@@ -154,16 +150,34 @@ Space Complexity: O(1)`;
                 <code>{loading ? 'Loading program...' : programContent}</code>
               </pre>
             </div>
-          </div>
-
-          <div className="output-section">
-            <h3>Sample Output</h3>
-            <p style={{ color: 'red' }}>Please note that the sample output is just an example and it may not be correct since this is AI Generated !!!</p>
-            <div className="output-content">
-              <pre>
-                <code>{loading ? 'Loading sample output...' : sampleOutput}</code>
-              </pre>
-            </div>
+            
+            {/* Show associated download buttons for UNIX programs */}
+            {associatedDownloads.length > 0 && (
+              <div style={{ marginTop: '20px' }}>
+                <h4>Data Files:</h4>
+                {associatedDownloads.map((fileName, index) => (
+                  <a
+                    key={index}
+                    href={`/data/${courseName!.toLowerCase()}/${fileName}`}
+                    download={fileName}
+                    className="download-btn"
+                    style={{
+                      display: 'inline-block',
+                      padding: '8px 16px',
+                      margin: '5px',
+                      backgroundColor: '#007bff',
+                      color: 'white',
+                      textDecoration: 'none',
+                      borderRadius: '4px',
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Download {fileName}
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </main>

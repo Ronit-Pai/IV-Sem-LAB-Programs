@@ -53,16 +53,6 @@ const Home: React.FC = () => {
             </div>
           </div>
         </section>
-        
-        <section className="section" style={{ textAlign: 'center' }}>
-  <button
-    className="glow-btn"
-    onClick={() => window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank')}
-  >
-    Click Me !!!
-  </button>
-</section>
-
       </main>
     </div>
   );

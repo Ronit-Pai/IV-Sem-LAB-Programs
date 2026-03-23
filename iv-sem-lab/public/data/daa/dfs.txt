@@ -1,0 +1,78 @@
+#include <stdio.h>
+#define max 10
+
+int count = 1;
+int adj[max][max];
+int visited[max];
+int n, e;
+
+void dfs(int v)
+{
+    visited[v] = count;
+
+    for(int j = 0; j < n; j++)
+    {
+        if(adj[v][j] == 1 && visited[j] == 0)
+        {
+            count++;
+            dfs(j);
+        }
+    }
+}
+
+int main()
+{
+    int i, j;
+    int src, dest;
+
+    printf("Enter the number of nodes:");
+    scanf("%d", &n);
+
+
+    for(i = 0; i < n; i++)
+    {
+        visited[i] = 0;
+        for(j = 0; j < n; j++)
+        {
+            adj[i][j] = 0;
+        }
+    }
+
+    printf("\nEnter the number of edges:");
+    scanf("%d", &e);
+
+
+    printf("\nEnter the Edges:");
+    for(i = 0; i < e; i++)
+    {
+        printf("\nEnter Source:");
+        scanf("%d", &src);
+        printf("\nEnter Destination:");
+        scanf("%d", &dest);
+
+        adj[src][dest] = 1;
+        adj[dest][src] = 1;
+    }
+
+    printf("\nAdjacency Matrix:\n");
+    for(i = 0; i < n; i++)
+    {
+        for(j = 0; j < n; j++)
+        {
+            printf("%d \t", adj[i][j]);
+        }
+        printf("\n");
+    }
+
+
+    dfs(0);
+
+    printf("Visiting Order:");
+    for(i = 0; i < n; i++)
+    {
+        printf("\nVertex %d is visited %d\n", i, visited[i]);
+    }
+
+    return 0;
+}
+
