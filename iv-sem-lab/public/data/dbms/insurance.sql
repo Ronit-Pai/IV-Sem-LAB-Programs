@@ -1,68 +1,144 @@
-CREATE DATABASE INSURANCE_14;
-USE INSURANCE_14;
-CREATE TABLE PERSON(
-DRIVERID VARCHAR(10) PRIMARY KEY,
-FNAME VARCHAR(15) NOT NULL,
-ADDRESS VARCHAR(30)
-);
+create Database Insurance
 
-INSERT INTO PERSON VALUES('111','JOHN SMITH','SP ROAD, BANGLORE');
-INSERT INTO PERSON VALUES('112','RAMESH BABU','KP NAGAR, UDUPI');
-INSERT INTO PERSON VALUES('113','RAJU SK','KS CIRCLE, MANGLORE');
-INSERT INTO PERSON VALUES('114','JEFFREY','NITTE');
-INSERT INTO PERSON VALUES('115','TRUMP','USA');
-
-SELECT * FROM PERSON;
-
-SELECT ADDRESS FROM PERSON WHERE DRIVERID='114'
-
-CREATE TABLE CAR(
-REGNO VARCHAR(10) PRIMARY KEY,
-MODEL VARCHAR(10) NOT NULL,
-CYEAR INT
-);
-
-INSERT INTO CAR VALUES('KA-20','CRETA',2025);
-INSERT INTO CAR VALUES('KA-29','SEIRRA',2025);
-INSERT INTO CAR VALUES('KA-19','PUNCH',2024);
-INSERT INTO CAR VALUES('KA-01','GLANZA',2023);
-INSERT INTO CAR VALUES('TS-20','VENUE',2026);
-INSERT INTO CAR VALUES('TS-29','FRONX',2022);
-INSERT INTO CAR VALUES('TN-20','BMW',2020);
-INSERT INTO CAR VALUES('TS-10','AUDI',2016);
-
-SELECT * FROM CAR;
-
-SELECT REGNO, MODEL, CYEAR FROM CAR WHERE CYEAR>2024;
-
-CREATE TABLE ACCIDENT(
-REPORTNO INT PRIMARY KEY,
-ACCDATE DATETIME,
-LOCATION VARCHAR(20)
-);
-
-INSERT INTO ACCIDENT VALUES(1,'2022-06-06','NITTE');
-INSERT INTO ACCIDENT VALUES(2,'2020-03-15','UDUPI');
-INSERT INTO ACCIDENT VALUES(3,'2019-11-22','MANGALORE');
-INSERT INTO ACCIDENT VALUES(4,'2023-01-08','SURATHKAL');
-INSERT INTO ACCIDENT VALUES(5,'2021-09-30','MOODBIDRI');
-INSERT INTO ACCIDENT VALUES(6,'2022-12-18','KUNDAPURA');
-INSERT INTO ACCIDENT VALUES(7,'2021-07-12','UDUPI');
-INSERT INTO ACCIDENT VALUES(8,'2020-02-10','NITTE');
-INSERT INTO ACCIDENT VALUES(9,'2022-08-25','UDUPI');
-INSERT INTO ACCIDENT VALUES(10,'2021-05-14','MANGALORE');
-INSERT INTO ACCIDENT VALUES(11,'2019-12-03','SURATHKAL');
-INSERT INTO ACCIDENT VALUES(12,'2023-04-19','MOODBIDRI');
-INSERT INTO ACCIDENT VALUES(13,'2020-10-07','KUNDAPURA');
-INSERT INTO ACCIDENT VALUES(14,'2022-01-28','UDUPI');
-INSERT INTO ACCIDENT VALUES(15,'2021-11-16','MANGALORE');
-
-SELECT * FROM ACCIDENT;
-SELECT COUNT(*) FROM ACCIDENT;
-
-SELECT * FROM ACCIDENT WHERE LOCATION='MANGALORE';
-SELECT COUNT(*) FROM ACCIDENT WHERE LOCATION='UDUPI';
-
-SELECT LOCATION,COUNT(*) AS COUNT_OF_ACCIDENT FROM ACCIDENT GROUP BY LOCATION;
+use Insurance
 
 
+CREATE TABLE PERSON (
+   driverid varchar(10),
+   fname char(15) not null,
+   address varchar(30),
+   primary key (driverid)
+)
+
+insert into PERSON values ('111', 'John Smith',    'SP Road, Bangalore-12')
+insert into PERSON values ('112', 'Ramesh Babu',   'KP Nagar, Udupi-13')
+insert into PERSON values ('113', 'Raju SK',        'KS Circle, Mangalore-12')
+insert into PERSON values ('114', 'Ramesh Babu',   'AS Road, Bangalore-14')
+insert into PERSON values ('115', 'Alica Wallace', 'SS Road, Karkala-16')
+
+select * from PERSON
+
+
+CREATE TABLE CAR (
+   regno  varchar(10),
+   model  varchar(10) not null,
+   cyear  int,
+   primary key(regno)
+)
+
+insert into CAR values ('KA-12', 'FORD',   1980)
+insert into CAR values ('KA-13', 'SWIFT',  1990)
+insert into CAR values ('MH-11', 'INDIGO', 1998)
+insert into CAR values ('AP-10', 'SWIFT',  1988)
+insert into CAR values ('TN-11', 'FORD',   2001)
+insert into CAR values ('TN-12', 'TOYATA', 2001)
+insert into CAR values ('MH-14', 'SWIFT',  2001)
+insert into CAR values ('KL-15', 'TOYATA', 2001)
+insert into CAR values ('KL-4',  'INDIGO', 2001)
+insert into CAR values ('AP-05', 'SANTRO', 2001)
+
+select * from CAR
+
+
+CREATE TABLE ACCIDENT (
+   reportno int,
+   accdate  datetime,
+   location varchar(20),
+   primary key(reportno)
+)
+
+insert into ACCIDENT values (1,  '1998-07-22', 'Nitte')
+insert into ACCIDENT values (2,  '1998-07-22', 'Karkala')
+insert into ACCIDENT values (12, '1998-07-22', 'Mangalore')
+insert into ACCIDENT values (3,  '1998-07-23', 'Mangalore')
+insert into ACCIDENT values (4,  '1990-09-09', 'Bhatkal')
+insert into ACCIDENT values (5,  '2001-02-22', 'Udupi')
+insert into ACCIDENT values (6,  '1990-09-09', 'Udupi')
+insert into ACCIDENT values (15, '1981-07-22', 'Udupi')
+insert into ACCIDENT values (7,  '1981-09-09', 'Karkala')
+insert into ACCIDENT values (8,  '1990-09-09', 'Bhatkal')
+insert into ACCIDENT values (9,  '2001-02-22', 'Udupi')
+insert into ACCIDENT values (10, '1998-02-02', 'Udupi')
+insert into ACCIDENT values (11, '1998-01-02', 'Bhatkal')
+insert into ACCIDENT values (13, '1998-07-22', 'Udupi')
+insert into ACCIDENT values (14, '1998-07-22', 'Karkala')
+
+select * from ACCIDENT
+
+
+CREATE TABLE OWNS (
+   driverid varchar(10),
+   regno    varchar(10),
+   primary key(driverid, regno),
+   foreign key(driverid) references PERSON(driverid) on delete cascade on update cascade,
+   foreign key(regno)    references CAR(regno) on delete cascade on update cascade,
+   unique(regno)
+)
+
+insert into OWNS values ('111', 'KA-13')
+insert into OWNS values ('111', 'KA-12')
+insert into OWNS values ('111', 'MH-11')
+insert into OWNS values ('112', 'AP-10')
+insert into OWNS values ('112', 'TN-11')
+insert into OWNS values ('113', 'TN-12')
+insert into OWNS values ('113', 'KL-15')
+insert into OWNS values ('114', 'AP-05')
+insert into OWNS values ('114', 'KL-4')
+insert into OWNS values ('115', 'MH-14')
+
+select * from OWNS
+
+
+CREATE TABLE PARTCIPATED (
+   driverid varchar(10),
+   regno    varchar(10),
+   reportno int,
+   dmgamt   int,
+   primary key(driverid, regno, reportno),
+   foreign key(driverid)        references PERSON(driverid) on delete cascade on update cascade,
+   foreign key(regno)           references CAR(regno) on delete cascade on update cascade,
+   foreign key(reportno)        references ACCIDENT(reportno) on delete cascade on update cascade,
+   foreign key(driverid, regno) references OWNS(driverid, regno),
+   unique(reportno)
+)
+
+insert into PARTCIPATED values ('111', 'KA-12', 1,  20000)
+insert into PARTCIPATED values ('111', 'KA-13', 2,  10000)
+insert into PARTCIPATED values ('111', 'KA-12', 3,  60000)
+insert into PARTCIPATED values ('111', 'KA-12', 4,  60000)
+insert into PARTCIPATED values ('111', 'KA-12', 5,  60000)
+insert into PARTCIPATED values ('111', 'KA-12', 15, 40000)
+insert into PARTCIPATED values ('111', 'KA-13', 6,  10000)
+insert into PARTCIPATED values ('111', 'MH-11', 12, 20000)
+insert into PARTCIPATED values ('112', 'AP-10', 7,  30000)
+insert into PARTCIPATED values ('112', 'TN-11', 8,  40000)
+insert into PARTCIPATED values ('112', 'AP-10', 13, 20000)
+insert into PARTCIPATED values ('112', 'TN-11', 14, 10000)
+insert into PARTCIPATED values ('113', 'TN-12', 9,  40000)
+insert into PARTCIPATED values ('113', 'KL-15', 10, 50000)
+insert into PARTCIPATED values ('113', 'TN-12', 11, 20000)
+
+select * from PARTCIPATED
+
+1) Find the total number of people who owned cars involved in accidents in 1989
+
+select count(distinct P.driverid)
+from accident A, partcipated P
+where A.reportno = P.reportno
+  and year(A.accdate) = '1998'
+
+2) Find the number of accidents in which cars belonging to "John Smith" were involved
+select count(P.reportno) as NO_OF_ACC
+from partcipated P, person PN
+where P.driverid = PN.driverid
+  and PN.fname = 'John Smith'
+
+3)Update the damage amount for car "KA-12" in accident report "1" to $3000
+update PARTCIPATED
+set dmgamt = 29000
+where reportno = 1
+  and driverid in (
+      select driverid
+      from owns
+      where regno = 'KA-13'
+  )
