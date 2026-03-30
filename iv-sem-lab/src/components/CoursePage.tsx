@@ -35,7 +35,12 @@ const CoursePage: React.FC = () => {
             { name: 'DFS Algorithm', fileName: 'dfs.txt', type: 'view' },
             { name: 'Insertion Sort', fileName: 'insertionSort.txt', type: 'view' },
             { name: 'Quick Sort', fileName: 'quicksort.txt', type: 'view' },
-            { name: 'Topological Sort', fileName: 'topo.txt', type: 'view' }
+            { name: 'Topological Sort', fileName: 'topo.txt', type: 'view' },
+            { name: 'Floyd-Warshall Algorithm', fileName: 'floyd.txt', type: 'view' },
+            { name: 'Heap Sort', fileName: 'heapSort.txt', type: 'view' },
+            { name: 'Horspool Algorithm', fileName: 'horsepool.txt', type: 'view' },
+            { name: 'Knapsack Problem', fileName: 'knapsack.txt', type: 'view' },
+            { name: 'Warshall Algorithm', fileName: 'warshall.txt', type: 'view' }
           ];
           setPrograms(daaFiles);
         } else if (courseName.toLowerCase() === 'mp') {
@@ -73,7 +78,9 @@ const CoursePage: React.FC = () => {
             { name: 'program6.sh', fileName: 'program6.sh', type: 'view' },
             { name: 'program7.sh', fileName: 'program7.sh', type: 'view' },
             { name: 'program8.sh', fileName: 'program8.sh', type: 'view' },
-            { name: 'program9.sh', fileName: 'program9.sh', type: 'view' }
+            { name: 'program9.sh', fileName: 'program9.sh', type: 'view' },
+            { name: 'prog1.pl', fileName: 'prog1.pl', type: 'view' },
+            { name: 'prog2.pl', fileName: 'prog2.pl', type: 'view' }
           ];
           setPrograms(unixFiles);
         } else {

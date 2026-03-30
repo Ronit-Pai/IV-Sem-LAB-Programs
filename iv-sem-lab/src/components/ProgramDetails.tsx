@@ -41,7 +41,7 @@ const ProgramDetails: React.FC = () => {
           } else {
             // If no extension, try to determine the correct one
             // We'll try common extensions in order of priority
-            const extensionsToTry = ['.txt', '.sh', '.awk', '']; // Note: empty string for files without extension
+            const extensionsToTry = ['.txt', '.sh', '.pl', '.awk', '']; // Note: empty string for files without extension
             
             let found = false;
             for (const ext of extensionsToTry) {
