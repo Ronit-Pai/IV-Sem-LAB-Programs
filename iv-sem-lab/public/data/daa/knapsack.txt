@@ -1,0 +1,58 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define MAX 10
+int w[MAX], v[MAX];
+int F[MAX][MAX];
+
+int max(int a, int b)
+{
+    if (a >= b)
+        return a;
+    else
+        return b;
+}
+
+int knapSack(int i, int j)
+{
+    int value;
+    if (i < 0 || j <= 0)
+        return 0;
+
+    if (F[i][j] < 0)
+    {
+        if (j < w[i])
+            value = knapSack(i - 1, j);
+        else
+            value = max(knapSack(i - 1, j),
+                        knapSack(i - 1, j - w[i]) + v[i]);
+        F[i][j] = value;
+    }
+
+    return F[i][j];
+}
+
+int main()
+{
+    int i, n, W;
+
+    printf("Enter the number of items:");
+    scanf("%d", &n);
+
+    printf("\nEnter the weights of items:");
+    for (i = 0; i < n; i++)
+        scanf("%d", &w[i]);
+
+    printf("\nEnter the values of items:");
+    for (i = 0; i < n; i++)
+        scanf("%d", &v[i]);
+
+    printf("\nEnter the max capacity of knapsack:");
+    scanf("%d", &W);
+    for (i = 0; i < MAX; i++)
+        for (int j = 0; j < MAX; j++)
+            F[i][j] = -1;
+    int res = knapSack(n - 1, W);
+    printf("\nOptimal solution is: %d", res);
+
+    return 0;
+}
