@@ -1,15 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Header from './Header';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 type Params = {
   courseName?: string;
   programName?: string;
 };
 
+const inferLanguage = (course: string, fileName: string): string => {
+  const lowerCourse = course.toLowerCase();
+  const lowerFile = fileName.toLowerCase();
+
+  if (lowerCourse === 'dbms' || lowerFile.endsWith('.sql')) return 'sql';
+  if (lowerCourse === 'mp' || lowerFile.endsWith('.asm')) return 'nasm';
+  if (lowerFile.endsWith('.pl')) return 'perl';
+  if (lowerFile.endsWith('.sh')) return 'bash';
+  if (lowerFile.endsWith('.awk')) return 'awk';
+
+  // DAA files are text files that contain algorithm programs.
+  if (lowerCourse === 'daa') return 'cpp';
+
+  return 'text';
+};
+
 const ProgramDetails: React.FC = () => {
   const { courseName, programName } = useParams<Params>();
   const [programContent, setProgramContent] = useState<string>('');
+  const [codeLanguage, setCodeLanguage] = useState<string>('text');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -57,6 +76,7 @@ const ProgramDetails: React.FC = () => {
                   if (!content.trim().startsWith('<')) {
                     fileName = testFileName;
                     setProgramContent(content);
+                    setCodeLanguage(inferLanguage(courseName, testFileName));
                     found = true;
                     break;
                   }
@@ -94,16 +114,20 @@ const ProgramDetails: React.FC = () => {
             // Check if the content looks like HTML (starts with <html>, <head>, <body>, etc.)
             if (content.trim().startsWith('<')) {
               setProgramContent(`// Error: Unexpected HTML content received instead of program code\n// File: ${fileName}\n// Please check if the file exists and is accessible`);
+              setCodeLanguage('text');
             } else {
               setProgramContent(content);
+              setCodeLanguage(inferLanguage(courseName, fileName));
             }
           } else {
             setProgramContent(`// Error: Could not load program content\n// File: ${fileName}\n// Status: ${response.status} ${response.statusText}`);
+            setCodeLanguage('text');
           }
         }
       } catch (error) {
         console.error('Error fetching program content:', error);
         setProgramContent('// Error: Could not load program content due to network error');
+        setCodeLanguage('text');
       } finally {
         setLoading(false);
       }
@@ -146,9 +170,15 @@ const ProgramDetails: React.FC = () => {
           <div className="program-section">
             <h3>Program Code</h3>
             <div className="program-code-full">
-              <pre>
-                <code>{loading ? 'Loading program...' : programContent}</code>
-              </pre>
+              <SyntaxHighlighter
+                language={codeLanguage}
+                style={oneDark}
+                customStyle={{ margin: 0, borderRadius: '8px' }}
+                showLineNumbers
+                wrapLongLines
+              >
+                {loading ? 'Loading program...' : programContent}
+              </SyntaxHighlighter>
             </div>
             
             {/* Show associated download buttons for UNIX programs */}
