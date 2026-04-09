@@ -1,71 +1,158 @@
 create database bank_14
 use bank_14
-
 create table branch(
-branch_name varchar(20) primary key,
-branch_city varchar(10),
-assets real )
+    bname varchar(20) primary key,
+    bcity varchar(20),
+    assets real
+);
 
-insert into branch values('axis-karla','karkala',1000000)
-insert into branch values('hdfc-udupi','udupi',2000000)
-insert into branch values('sbi-karla','karkala',5000000)
-insert into branch values('canara-nitte','nitte',8000000)
-insert into branch values('bob-karla','karkala',3000000)
 
-select * from branch
+insert into branch values('axis-karla','karkala',1000000);
+insert into branch values('sbi-karla','karkala',2000000);
+insert into branch values('bob-karla','karkala',3000000);
+insert into branch values('hdfc-udupi','udupi',4000000);
+insert into branch values('canara-nitte','nitte',5000000);
+
+select * from branch;
+
 
 create table account(
-accno int ,
-branch_name varchar(20),
-balance real 
-primary key(accno),
-foreign key(branch_name) references branch(branch_name) on delete cascade on update cascade
-)
-insert into account values(1,'axis-karla',10000),
-						  (2,'axis-karla',20000),
-						  (3,'hdfc-udupi',30000),
-						  (4,'hdfc-udupi',35000),
-						  (5,'sbi-karla',30000),
-						  (6,'sbi-karla',50000),
-						  (7,'canara-nitte',55000),
-						  (8,'canara-nitte',57500),
-						  (9,'bob-karla',65000),
-						  (10,'bob-karla',45000)
-select * from account
+    accno int primary key,
+    bname varchar(20),
+    balance real,
+    foreign key(bname) references branch(bname) on delete cascade on update cascade
+);
+
+
+insert into account values(1,'axis-karla',10000);
+insert into account values(2,'axis-karla',15000);
+insert into account values(3,'sbi-karla',20000);
+insert into account values(4,'sbi-karla',25000);
+insert into account values(5,'bob-karla',30000);
+insert into account values(6,'bob-karla',35000);
+insert into account values(7,'hdfc-udupi',40000);
+insert into account values(8,'canara-nitte',45000);
+
+select * from account;
+
 
 create table customer(
-cname varchar(20) primary key,
-c_street varchar(20),
-c_city varchar(20) 
-)
+    cname varchar(20) primary key,
+    c_street varchar(20),
+    c_city varchar(20)
+);
 
-insert into customer values('ramesh','lane-1','nitte'),
-						   ('umesh','lane-2','karkala'),
-						   ('mahesh','street-5','udupi'),
-						   ('aditya','lane-3','manglore')
 
-select * from customer
+insert into customer values('ramesh','lane-1','nitte');
+insert into customer values('umesh','lane-2','karkala');
+insert into customer values('mahesh','street-5','udupi');
+insert into customer values('aditya','lane-3','manglore');
+
+select * from customer;
 
 create table depositer(
-cname varchar(20),
-accno int,
-primary key(cname,accno),
-foreign key(cname) references customer(cname) on delete cascade on update cascade,
-foreign key(accno) references account(accno) on delete cascade on update cascade
-)
+    cname varchar(20),
+    accno int,
+    primary key(cname,accno),
+    foreign key(cname) references customer(cname) on delete cascade on update cascade,
+    foreign key(accno) references account(accno) on delete cascade on update cascade
+);
+
+
+insert into depositer values('ramesh',1);  
+insert into depositer values('ramesh',2);  
+insert into depositer values('ramesh',3);  
+insert into depositer values('ramesh',4);  
+insert into depositer values('ramesh',5);  
+insert into depositer values('ramesh',6);  
+insert into depositer values('umesh',7);   
+insert into depositer values('umesh',8);   
+insert into depositer values('umesh',1);   
+insert into depositer values('mahesh',7);  
+insert into depositer values('aditya',8);  
+
 
 
 create table loan(
-loan_no int primary key,
-branch_name varchar(20),
-amount real,
-foreign key(branch_name) references branch(branch_name) on delete cascade on update cascade
-)
+    loan_no int primary key,
+    bname varchar(20),
+    amount real,
+    foreign key(bname) references branch(bname) on delete cascade on update cascade
+);
+
+
+insert into loan values(101,'axis-karla',50000);
+insert into loan values(102,'sbi-karla',75000);
+insert into loan values(103,'bob-karla',100000);
+insert into loan values(104,'hdfc-udupi',125000);
+insert into loan values(105,'canara-nitte',90000);
+
+select * from loan;
+
 
 create table borrower(
-cname varchar(20),
-loan_no int,
-primary key(cname,loan_no),
-foreign key(cname) references customer(cname) on delete cascade on update cascade,
-foreign key(loan_no) references loan(loan_no) on delete cascade on update cascade
-)
+    cname varchar(20),
+    loan_no int,
+    primary key(cname,loan_no),
+    foreign key(cname) references customer(cname) on delete cascade on update cascade,
+    foreign key(loan_no) references loan(loan_no) on delete cascade on update cascade
+);
+
+
+insert into borrower values('ramesh',101);
+insert into borrower values('umesh',102);
+insert into borrower values('mahesh',103);
+insert into borrower values('aditya',104);
+insert into borrower values('ramesh',105);
+
+select * from borrower;
+
+
+select C.cname 
+from customer C
+where not exists(
+    select B.bname 
+    from branch B 
+    where B.bcity = 'karkala' 
+      and B.bname not in (
+        select distinct A.bname 
+        from account A, depositer D
+        where D.accno = A.accno
+          and A.bname = B.bname
+          and D.cname = C.cname
+        group by A.bname 
+        having count(*) >= 2
+      )
+);
+
+
+select C.cname 
+from customer C
+where not exists(
+    select distinct B.bcity 
+    from branch B
+    where not exists (
+        select A.bname 
+        from account A, depositer D
+        where D.accno = A.accno
+          and D.cname = C.cname 
+          and A.bname in (
+            select bname from branch where bcity = B.bcity
+          )
+    )
+);
+
+
+select C.cname 
+from customer C
+where exists(
+    select count(distinct B.bname) 
+    from branch B, account A, depositer D
+    where A.bname = B.bname
+      and D.accno = A.accno
+      and B.bcity = 'karkala'
+      and D.cname = C.cname
+    group by B.bcity 
+    having count(*) >= 2
+);
+
