@@ -622,6 +622,12 @@ a {
   color: #d4d4d4;
 }
 
+.sample-output-disclaimer {
+  margin: 0 0 10px 0;
+  color: #ff4d4f;
+  font-weight: 700;
+}
+
 .program-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
