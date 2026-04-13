@@ -15,28 +15,30 @@ void insert(int ele)
     bfs(ele);
 }
 
-void del()
+int del()
 {
-    queue[front]=0;
+    int item=queue[front];
     front++;
+    return item;	
 }
 
 //BFS
 void bfs(int v)
 {
+    insert(v);
     visited[v]=count;
     while(front<=rear)
     {
+	int fv=del();
         for(int j=0;j<n; j++)
         {
-            if(adj[v][j]==1 && visited[j]==0)
+            if(adj[fv][j]==1 && visited[j]==0)
             {
                 count++;
                 visited[j]=count;
                 insert(j);
             }
         }
-        del();
     }
 }
 
@@ -78,7 +80,7 @@ int main()
         }
         printf("\n");
     }
-    insert(0);
+    bfs(0);
     printf("Visiting Order:");
     for(i=0; i<n; i++)
     {
